@@ -28,7 +28,12 @@ mongoose
 const app = express()
 
 // Middleware to handle cors
-app.use(cors({ origin: true, credentials: true }));
+app.use(
+  cors({
+    origin: process.env.FRONT_END_URL, // exact match
+    credentials: true,
+  })
+);
 
 // Middleware to handle JSON object in req body
 app.use(express.json())
