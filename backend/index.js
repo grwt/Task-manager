@@ -11,8 +11,8 @@ import taskRoutes from "./routes/task.route.js"
 import reportRoutes from "./routes/report.route.js"
 import { fileURLToPath } from "url"
 
-dotenv.config()
-
+dotenv.config({ override: false })
+console.log("FRONT_END_URL:", process.env.FRONT_END_URL)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -30,7 +30,16 @@ const app = express()
 // Middleware to handle cors
 app.use(
   cors({
-    origin: process.env.FRONT_END_URL, // exact match
+    origin: function (origin, callback) {
+      const isVercel = /https:\/\/task-manager.*\.vercel\.app$/.test(origin);
+      const isLocalhost = /http:\/\/localhost:\d+/.test(origin);
+
+      if (!origin || isVercel || isLocalhost) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
