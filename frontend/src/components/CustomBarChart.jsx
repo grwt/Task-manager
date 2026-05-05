@@ -30,7 +30,10 @@ const CustomBarChart = ({ data }) => {
   }
 
   const CustomToolTip = ({ active, payload }) => {
+    if (!active || !payload || payload.length === 0) return null
     if (active && payload && payload.length) {
+      const data = payload?.[0]?.payload
+      if(!data) return null
       return (
         <div className="bg-white p-2 shadow-md rounded-lg border border-gray-300">
           <p className="text-xs font-semibold text-purple-800 mb-1">
