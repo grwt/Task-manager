@@ -9,10 +9,8 @@ import toast from "react-hot-toast"
 
 const ManageTasks = () => {
   const [allTasks, setAllTasks] = useState([])
-  const [tabs, setTabs] = useState("All")
+  const [tabs, setTabs] = useState([])
   const [filterStatus, setFilterStatus] = useState("All")
-
-  console.log(tabs)
 
   const navigate = useNavigate()
 
@@ -25,7 +23,7 @@ const ManageTasks = () => {
       })
 
       if (response?.data) {
-        setAllTasks(response.data?.tasks?.length > 0 ? response.data.tasks : [])
+        setAllTasks(response.data?.tasks || [])
       }
 
       const statusSummary = response.data?.statusSummary || {}
@@ -53,12 +51,10 @@ const ManageTasks = () => {
         responseType: "blob",
       })
 
-      // create a url for the blob
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement("a")
 
       link.href = url
-
       link.setAttribute("download", "tasks_details.xlsx")
       document.body.appendChild(link)
 
@@ -73,16 +69,14 @@ const ManageTasks = () => {
   }
 
   useEffect(() => {
-    getAllTasks(filterStatus)
-
-    return () => {}
+    getAllTasks()
   }, [filterStatus])
 
   return (
     <DashboardLayout activeMenu={"Manage Task"}>
       <div className="my-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
-          <div className="flex items-center justify-between gap-4 w-full md:w-auto ">
+          <div className="flex items-center justify-between gap-4 w-full md:w-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
               My Tasks
             </h2>
@@ -96,7 +90,7 @@ const ManageTasks = () => {
             </button>
           </div>
 
-          {allTasks?.length > 0 && (
+          {tabs.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
               <TaskStatusTabs
                 tabs={tabs}
@@ -117,23 +111,37 @@ const ManageTasks = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {allTasks?.map((item, index) => (
-            <TaskCard
-              key={item._id}
-              title={item.title}
-              description={item.description}
-              priority={item.priority}
-              status={item.status}
-              progress={item.progress}
-              createdAt={item.createdAt}
-              dueDate={item.dueDate}
-              assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
-              attachmentCount={item.attachments?.length || 0}
-              completedTodoCount={item.completedTodoCount || 0}
-              todoChecklist={item.todoChecklist || []}
-              onClick={() => handleClick(item)}
-            />
-          ))}
+          {allTasks.length === 0 ? (
+            <div className="col-span-3 flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <FaFileLines className="text-2xl text-gray-400" />
+              </div>
+              <p className="text-gray-500 text-lg font-medium">No tasks found</p>
+              <p className="text-gray-400 text-sm mt-1">
+                {filterStatus === "All"
+                  ? "No tasks have been created yet."
+                  : `No tasks with status "${filterStatus}".`}
+              </p>
+            </div>
+          ) : (
+            allTasks.map((item) => (
+              <TaskCard
+                key={item._id}
+                title={item.title}
+                description={item.description}
+                priority={item.priority}
+                status={item.status}
+                progress={item.progress}
+                createdAt={item.createdAt}
+                dueDate={item.dueDate}
+                assignedTo={item.assignedTo?.map((i) => i.profileImageUrl)}
+                attachmentCount={item.attachments?.length || 0}
+                completedTodoCount={item.completedTodoCount || 0}
+                todoChecklist={item.todoChecklist || []}
+                onClick={() => handleClick(item)}
+              />
+            ))
+          )}
         </div>
       </div>
     </DashboardLayout>
