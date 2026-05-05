@@ -84,6 +84,7 @@ export const signin = async (req, res, next) => {
       httpOnly: true,
       secure:true,
       sameSite:"None",
+      path: "/",
     })
     .json(rest)
   } catch (error) {
@@ -150,10 +151,14 @@ export const uploadImage = async (req, res, next) => {
 
 export const signout = async (req, res, next) => {
   try {
-    res
-      .clearCookie("access_token")
-      .status(200)
-      .json("User has been loggedout successfully!")
+    res.clearCookie("access_token", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  path: "/",
+})
+.status(200)
+.json("User has been loggedout successfully!")
   } catch (error) {
     next(error)
   }
